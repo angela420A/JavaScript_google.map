@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="../Modules/MyHelper.js"></script>
+
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map;
+        var taiwanmask = '';
+
+
+        // window.onload = function () {
+        //     let xhr = new HttpRequest();
+        //     xhr.onload = function () {
+        //         // document.getElementById('msg').innerHTML = this.responseText;
+        //         taiwanmask = JSON.parse(this.responseText);
+        //         CreateMyJson(taiwanmask);
+        //     }
+        //     xhr.open("GET", 'https://findmasks.herokuapp.com/places');
+        //     // xhr.open("GET", 'https://maskmap.azurewebsites.net/api/mask/getmaskstock');
+        //     xhr.send();
+        // };
+
+        // window.onload = function () {
+        //     $.ajax({
+        //         type: "GET",
+        //         url: "https://maskmap.azurewebsites.net/api/mask/getmaskstock",
+        //         data: "data",
+        //         dataType: "Json",
+        //         success: function (response) {
+        //             CreateMyJson(response.features);
+        //         },
+        //     });
+        // }
+
+
+        // function CreateMyJson(store) {
+
+        //     var MyJson = [];
+        //     store.forEach((item) => {
+        //         var InMyJson = {
+        //             name: item.properties.name,
+        //             coordinates: { lat: item.geometry.coordinates[1], lng: item.geometry.coordinates[0] },
+        //             masksLeft: item.properties.masksLeft,
+        //             childMasksLeft: item.properties.childMasksLeft
+        //         };
+        //         MyJson.push(InMyJson);
+        //     });
+
+        //     initMap(MyJson);
+        //     console.log(MyJson);
+        // }
+
+
+        function initMap() {
+            // The location of Uluru
+            var store = { lat: 24.757131, lng: 120.952229 };
+
+
+            // The map, centered at Uluru
+            var map = new google.maps.Map(
+                document.getElementById('map'), { zoom: 15, center: store });
+
+
+            $.ajax({
+                type: "GET",
+                url: "https://maskmap.azurewebsites.net/api/mask/getmaskstock",
+                data: "data",
+                dataType: "Json",
+                success: function (response) {
+
+
+                    var MyJson = [];
+                    response.features.forEach((item) => {
+                        var InMyJson = {
+                            name: item.properties.name,
+                            coordinates: { lat: item.geometry.coordinates[1], lng: item.geometry.coordinates[0] },
+                            masksLeft: item.properties.masksLeft,
+                            childMasksLeft: item.properties.childMasksLeft
+                        };
+                        MyJson.push(InMyJson);
+                    });
+                    // The marker, positioned at Uluru
+                    MyJson.forEach(item => {
+                        if(item.masksLeft >0 && item.childMasksLeft > 0){
+                            var marker = new google.maps.Marker({ position: item.coordinates, map: map, 
+                            icon: {
+                                url: "../Pic/smile.png",
+                                scaledSize: new google.maps.Size(20, 20)
+                            }
+                            });
+                        }
+                        else if(item.masksLeft >0 && item.childMasksLeft == 0)
+                        {
+                            var marker = new google.maps.Marker({ position: item.coordinates, map: map, 
+                            icon: {
+                                url: "../Pic/bigman.png",
+                                scaledSize: new google.maps.Size(20, 20)
+                            }
+                            });
+                        }
+                        else if(item.masksLeft == 0 && item.childMasksLeft > 0)
+                        {
+                            var marker = new google.maps.Marker({ position: item.coordinates, map: map, 
+                            icon: {
+                                url: "../Pic/child.png",
+                                scaledSize: new google.maps.Size(20, 20)
+                            }
+                            });
+                        }
+                        else if(item.masksLeft == 0 && item.childMasksLeft == 0)
+                        {
+                            var marker = new google.maps.Marker({ position: item.coordinates, map: map, 
+                            icon: {
+                                url: "../Pic/sad.png",
+                                scaledSize: new google.maps.Size(20, 20)
+                            }
+                            });
+                        }
+                            
+                    });
+
+                },
+                error: function (response) {
+                    console.log("Error");
+                }
+            });
+
+
+        }
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key= AIzaSyAlKWP4uWjQIR3WDAWLAu6rUhBfc3_ppag&callback=initMap"
+        async defer></script>
+</body>
+
+</html>
